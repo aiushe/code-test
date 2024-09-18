@@ -3,6 +3,7 @@ import Content from "./models/Content.model";
 import User from "./models/User.model";
 import express, { Request, Response } from "express";
 import cors from "cors";
+import { ContentStatus } from "./enums/ContentStatus.enum";
 
 const app = express();
 const PORT = 4000;
@@ -48,15 +49,46 @@ app.get(
   ) => {
     const userId = req.params["userId"];
 
-    // TODO: Get content for user
-    res.json([]);
+    const content = await Content.findAll({
+      where: {
+        userId: userId,
+      },
+    });
+    res.json(content);
   }
 );
 
 // Update content status
-// If the status is not valid, return 400 status code
-// If the content does not exist, return 404 status code
-// If the content is already approved, you can't change the status, return 400 status code
+app.put(
+  "/content/:contentId/status",
+  async (
+    req: Request<{ contentId: number }>,
+    res: Response<{ message: string }>
+  ) => {
+    const contentId = req.params["contentId"];
+    const { status } = req.body;
+
+    // Check status using the enum
+    if (!Object.values(ContentStatus).includes(status)) {
+      return res.status(400).json({ message: "status is not valid" });
+    }
+
+    // If the status is not valid, return 400 status code
+    const content = await Content.findByPk(contentId);
+    if (!content) {
+      return res.status(404).json({ message: "content does not exist" });
+    }
+
+    // If the content is already approved, you can't change the status, return 400 status code  
+    if (content.status === ContentStatus.APPROVED) {
+      return res.status(400).json({ message: "content is already approved, you can't change the status" });
+    }
+
+    // Update status
+    await content.update({ status });
+    res.json({ message: "Status updated" });
+  }
+);
 
 // Start the server
 app.listen(PORT, () => {
