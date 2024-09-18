@@ -1,5 +1,5 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { onApproveContent, onRejectContent } from "../redux/actions/dashboardActions";
 
@@ -24,10 +24,17 @@ const ActionButton = styled.button`
   &:hover {
     background-color: ${(props) => (props.approve ? "#218838" : "#c82333")};
   }
+
+  &:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
 `;
 
 const UserContent = ({ userId, content }) => {
   const dispatch = useDispatch();
+  
+  const loadingContentItems = useSelector((state) => state.dashboard.loadingContentItems);
 
   const handleApprove = (contentId) => {
     dispatch(onApproveContent(userId, contentId));
@@ -42,8 +49,19 @@ const UserContent = ({ userId, content }) => {
       {content.map((item) => (
         <ContentItem key={item.id}>
           <p>{item.text}</p>
-          <ActionButton approve onClick={() => handleApprove(item.id)}>Approve</ActionButton>
-          <ActionButton onClick={() => handleReject(item.id)}>Reject</ActionButton>
+          <ActionButton
+            approve
+            onClick={() => handleApprove(item.id)}
+            disabled={loadingContentItems[item.id]}
+          >
+            {loadingContentItems[item.id] ? 'Approving...' : 'Approve'}
+          </ActionButton>
+          <ActionButton
+            onClick={() => handleReject(item.id)}
+            disabled={loadingContentItems[item.id]}
+          >
+            {loadingContentItems[item.id] ? 'Rejecting...' : 'Reject'}
+          </ActionButton>
         </ContentItem>
       ))}
     </ContentContainer>

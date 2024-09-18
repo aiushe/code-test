@@ -38,24 +38,28 @@ const UserList = () => {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.dashboard.users);
   const userContent = useSelector((state) => state.dashboard.userContent);
-  const loading = useSelector((state) => state.dashboard.loading);
-  const loadingContent = useSelector((state) => state.dashboard.loadingContent);
+  const loadingUsers = useSelector((state) => state.dashboard.loadingUsers);
+  const loadingContentByUser = useSelector((state) => state.dashboard.loadingContentByUser);
 
   const [activeUser, setActiveUser] = useState(null);
 
   useEffect(() => {
-    dispatch(onLoadDashboardUsers());
-  }, [dispatch]);
+    console.log("user content:", userContent);
+  }, [userContent]);
+  
 
   const handleViewContent = (userId) => {
-    setActiveUser((prevActiveUser) => (prevActiveUser === userId ? null : userId));
-    
-    if (!userContent[userId]) {
-      dispatch(onLoadUserContent(userId));
+    if (activeUser === userId) {
+      setActiveUser(null); // Toggle off if the same user is clicked again
+    } else {
+      setActiveUser(userId); // Set the active user
+      if (!userContent[userId]) {
+        dispatch(onLoadUserContent(userId)); // Only load if not already loaded
+      }
     }
   };
 
-  if (loading) {
+  if (loadingUsers) {
     return <div>Loading users...</div>;
   }
 
@@ -68,16 +72,16 @@ const UserList = () => {
             <div>{user.name}</div>
             <ViewContentButton
               onClick={() => handleViewContent(user.id)}
-              disabled={loadingContent && activeUser === user.id}
+              disabled={loadingContentByUser[user.id]} // Disable button while loading for this user
             >
               {activeUser === user.id ? "Hide Content" : "View Content"}
             </ViewContentButton>
           </UserItem>
           {activeUser === user.id && (
             <>
-              {loadingContent ? (
+              {loadingContentByUser[user.id] ? (
                 <div>Loading content...</div>
-              ) : userContent[user.id] ? (
+              ) : userContent[user.id] && userContent[user.id].length > 0 ? (
                 <UserContent
                   userId={user.id}
                   content={userContent[user.id]}
