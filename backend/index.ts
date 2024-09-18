@@ -55,49 +55,62 @@ app.get(
       }[]
     >
   ) => {
-    const userId = req.params.userId;
-    console.log(`Fetching content for userId: ${userId}`);
-    const content = await Content.findAll({
-      where: {
-        userId: userId,
-      },
-    });
-    console.log(`Found ${content.length} content items for userId: ${userId}`);
-    res.json(content);
+    const userId = req.params["userId"];
+
+    try {
+      // Fetch content where userId matches the provided userId
+      const content = await Content.findAll({
+        where: {
+          userId: userId,
+        },
+      });
+
+      // Return the content or an empty array if no content found
+      res.json(content);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json([]);
+    }
   }
 );
 
 // Update content status
-app.put(
+app.patch(
   "/content/:contentId/status",
   async (
-    req: Request<{ contentId: number }>,
-    res: Response<{ message: string }>
+    req: Request<{ contentId: number }, {}, { status: string }>,
+    res: Response
   ) => {
-    const contentId = req.params["contentId"];
+    const { contentId } = req.params;
     const { status } = req.body;
 
-    //testing console.log(`content ID: ${contentId}, status: ${status}`);
+    // Testing console.log to check contentId and status
+    console.log(`content ID: ${contentId}, status: ${status}`);
+
     // Check status using the enum
-    if (!Object.values(ContentStatus).includes(status)) {
+    if (!Object.values(ContentStatus).includes(status as ContentStatus)) {
       return res.status(400).json({ message: "status is not valid" });
     }
 
-    // If the status is not valid, return 400 status code
+    // Fetch content by ID
     const content = await Content.findByPk(contentId);
     if (!content) {
       return res.status(404).json({ message: "content does not exist" });
     }
 
-    // If the content is already approved, you can't change the status, return 400 status code  
+    // If the content is already approved, you can't change the status
     if (content.status === ContentStatus.APPROVED) {
-      return res.status(400).json({ message: "content is already approved, you can't change the status" });
+      return res.status(400).json({
+        message: "content is already approved, you can't change the status",
+      });
     }
 
-    // Update status
-    await content.update({ status });
+    // Update content status by casting the string to the ContentStatus enum
+    await content.update({ status: status as ContentStatus });
     res.json({ message: "Status updated" });
-    //test json res.json({ message: `received contentId: ${contentId} with status: ${status}` });
+
+    // For testing purposes: res.json can return received contentId and status
+    // res.json({ message: `received contentId: ${contentId} with status: ${status}` });
   }
 );
 

@@ -4,6 +4,7 @@ import {
   DataType,
   Table,
   BelongsTo,
+  ForeignKey,
 } from "sequelize-typescript";
 
 import User from "./User.model";
@@ -29,6 +30,7 @@ export default class Content extends Model {
   })
   declare status: ContentStatus;
 
+  @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
     field: "userId",
