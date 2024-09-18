@@ -24,17 +24,36 @@ const ViewContentButton = styled.button`
   }
 `;
 
+// user content section
+const UserContent = styled.div`
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin-top: 10px;
+`;
+
 const UserList = () => {
   const dispatch = useDispatch();
   
   // get users and loading state from Redux
   const users = useSelector((state) => state.dashboard.users);
+  const userContent = useSelector((state) => state.dashboard.userContent);
+
   const loading = useSelector((state) => state.dashboard.loading);
+  const loadingContent = useSelector((state) => state.dashboard.loadingContent);
+
+  //track active content
+  const [activeUser, setActiveUser] = useState(null);
 
   // load users
   useEffect(() => {
     dispatch(onLoadDashboardUsers());
   }, [dispatch]);
+
+  // "View Content" button click
+  const handleViewContent = (userId) => {
+    setActiveUser(userId);
+    dispatch(onLoadUserContent(userId));
+  };
 
   //loading message
   if (loading) {
@@ -46,10 +65,30 @@ const UserList = () => {
     <div>
       {users && users.length > 0 ? (
         users.map((user) => (
-          <UserItem key={user.id}>
-            <div>{user.name}</div>
-            <ViewContentButton>View Content</ViewContentButton>
-          </UserItem>
+          <div key={user.id}>
+            <UserItem>
+              <div>{user.name}</div>
+              <ViewContentButton onClick={() => handleViewContent(user.id)}>
+                View Content
+              </ViewContentButton>
+            </UserItem>
+
+            {/* show user content if this user's content is active */}
+            {activeUser === user.id && userContent[user.id] && (
+              <UserContent>
+                {loadingContent ? (
+                  <div>loading content...</div>
+                ) : (
+                  userContent[user.id].map((contentItem) => (
+                    <div key={contentItem.id}>
+                      <div>{contentItem.title}</div>
+                      {/* Approve and Reject buttons will go here */}
+                    </div>
+                  ))
+                )}
+              </UserContent>
+            )}
+          </div>
         ))
       ) : (
         <div>No users found</div>
