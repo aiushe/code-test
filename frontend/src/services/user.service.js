@@ -2,12 +2,10 @@ import api from "../lib/api";
 
 export const getUsers = () => api.get("/users");
 
-export const getUserContent = (userId) => api.get(`/users/${userId}/content`);
+export const getUserContent = (userId) => api.get(`/content/${userId}`);
 
-//approve content
 export const approveContent = (userId, contentId) => 
-api.post(`/users/${userId}/content/${contentId}/approve`);
-  
-//reject content
+  api.post(`/content/${userId}/${contentId}/approve`);
+
 export const rejectContent = (userId, contentId) => 
-api.post(`/users/${userId}/content/${contentId}/reject`);
+  api.post(`/content/${userId}/${contentId}/reject`);

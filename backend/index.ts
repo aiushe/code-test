@@ -28,6 +28,11 @@ app.use(
   })
 );
 
+// Add this route for testing
+app.get("/", (req, res) => {
+  res.json({ message: "Backend server is running" });
+});
+
 // Get users route
 app.get("/users", async (req: Request, res) => {
   const users = await User.findAll();
@@ -50,13 +55,14 @@ app.get(
       }[]
     >
   ) => {
-    const userId = req.params["userId"];
-
+    const userId = req.params.userId;
+    console.log(`Fetching content for userId: ${userId}`);
     const content = await Content.findAll({
       where: {
         userId: userId,
       },
     });
+    console.log(`Found ${content.length} content items for userId: ${userId}`);
     res.json(content);
   }
 );
