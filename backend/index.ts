@@ -8,6 +8,9 @@ import { ContentStatus } from "./enums/ContentStatus.enum";
 const app = express();
 const PORT = 4000;
 
+//parse JSON file
+app.use(express.json());
+
 const sequelize = new Sequelize("HFC", "root", "HFC2023", {
   host: "35.239.125.245",
   dialect: "mysql",
@@ -68,6 +71,7 @@ app.put(
     const contentId = req.params["contentId"];
     const { status } = req.body;
 
+    //testing console.log(`content ID: ${contentId}, status: ${status}`);
     // Check status using the enum
     if (!Object.values(ContentStatus).includes(status)) {
       return res.status(400).json({ message: "status is not valid" });
@@ -87,6 +91,7 @@ app.put(
     // Update status
     await content.update({ status });
     res.json({ message: "Status updated" });
+    //test json res.json({ message: `received contentId: ${contentId} with status: ${status}` });
   }
 );
 
