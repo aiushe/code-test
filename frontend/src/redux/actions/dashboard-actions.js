@@ -1,4 +1,4 @@
-import { getUsers } from "../../services/user.service";
+import { getUserContent, approveContent, rejectContent } from "../../services/user.service";
 import { DashboardActions } from "../action-types/dashboard-action-types";
 
 export const onLoadDashboardUsers = (userId) => async (dispatch) => {
@@ -16,5 +16,31 @@ export const onLoadDashboardUsers = (userId) => async (dispatch) => {
     console.error(error);
   } finally {
     dispatch({ type: DashboardActions.SET_LOADING_USERS, payload: false });
+  }
+};
+
+//accept user
+export const onApproveContent = (userId, contentId) => async (dispatch) => {
+  try {
+    await approveContent(userId, contentId);
+    dispatch({ 
+      type: DashboardActions.APPROVE_CONTENT, 
+      payload: {userId, contentId}
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+//reject user
+export const onRejectContent = (userId, contentId) => async (dispatch) => {
+  try {
+    await rejectContent(userId, contentId);
+    dispatch({ 
+      type: DashboardActions.REJECT_CONTENT, 
+      payload: {userId, contentId}
+    });
+  } catch (error) {
+    console.error(error);
   }
 };

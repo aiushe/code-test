@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { onLoadDashboardUsers } from "../redux/actions/dashboardActions";
+import { onLoadDashboardUsers, onLoadUserContent, onApproveContent, onRejectContent } from "../redux/actions/dashboardActions";
 import styled from "styled-components";
 
 // user item
@@ -31,6 +31,27 @@ const UserContent = styled.div`
   margin-top: 10px;
 `;
 
+const ActionButton = styled.button`
+  margin-left: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: none;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const ApproveButton = styled(ActionButton)`
+  background-color: green;
+  color: white;
+`;
+
+const RejectButton = styled(ActionButton)`
+  background-color: red;
+  color: white;
+`;
+
 const UserList = () => {
   const dispatch = useDispatch();
   
@@ -53,6 +74,16 @@ const UserList = () => {
   const handleViewContent = (userId) => {
     setActiveUser(userId);
     dispatch(onLoadUserContent(userId));
+  };
+
+  //approval
+  const handleApproveContent = (userId, contentId) => {
+    dispatch(onApproveContent(userId, contentId));
+  };
+
+  //rejection
+  const handleRejectContent = (userId, contentId) => {
+    dispatch(onRejectContent(userId, contentId));
   };
 
   //loading message
@@ -82,7 +113,24 @@ const UserList = () => {
                   userContent[user.id].map((contentItem) => (
                     <div key={contentItem.id}>
                       <div>{contentItem.title}</div>
-                      {/* Approve and Reject buttons will go here */}
+                      {contentItem.status === "approved" ? (
+                        <span>Status: Approved</span>
+                      ) : contentItem.status === "rejected" ? (
+                        <span>Status: Rejected</span>
+                      ) : (
+                        <>
+                          <ApproveButton
+                            onClick={() => handleApproveContent(user.id, contentItem.id)}
+                          >
+                            Approve
+                          </ApproveButton>
+                          <RejectButton
+                            onClick={() => handleRejectContent(user.id, contentItem.id)}
+                          >
+                            Reject
+                          </RejectButton>
+                        </>
+                      )}
                     </div>
                   ))
                 )}

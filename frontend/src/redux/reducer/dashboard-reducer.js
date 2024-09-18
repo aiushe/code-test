@@ -1,4 +1,3 @@
-import { getUserContent } from "../../services/user.service"; // Assuming this exists
 import { DashboardActions } from "../action-types/dashboard-action-types";
 
 const initialState = {
@@ -37,6 +36,32 @@ export default (state = initialState, action) => {
         ...state,
         loadingContent: action.payload,
       };
+
+    case DashboardActions.APPROVE_CONTENT: {
+      const { userId, contentId } = action.payload;
+      return {
+        ...state,
+        userContent: {
+          ...state.userContent,
+          [userId]: state.userContent[userId].map((content) =>
+            content.id === contentId ? { ...content, status: "approved" } : content
+          ),
+        },
+      };
+    }
+
+    case DashboardActions.REJECT_CONTENT: {
+      const { userId, contentId } = action.payload;
+      return {
+        ...state,
+        userContent: {
+          ...state.userContent,
+          [userId]: state.userContent[userId].map((content) =>
+            content.id === contentId ? { ...content, status: "rejected" } : content
+          ),
+        },
+      };
+    }
 
     case DashboardActions.RESET_STATE:
       return initialState;
