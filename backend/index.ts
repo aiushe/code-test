@@ -135,10 +135,7 @@ app.patch(
     console.log("content.status before update:", content.status);
     await content.update({ status: status as ContentStatus });
     console.log("content.status after update:", content.status);
-    res.json({ message: "Status updated" });
-
-    // For testing purposes: res.json can return received contentId and status
-    // res.json({ message: `received contentId: ${contentId} with status: ${status}` });
+    res.json({ message: "status updated" });
   }
 );
 

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Container, UserContainer, UsersListContainer } from "./styles";
 import { onLoadDashboardUsers } from "../../redux/actions/dashboard-actions";
+import UserList from "../../components/UserList";
 
 export const MainContainer = () => {
   const dispatch = useDispatch();
@@ -13,10 +14,10 @@ export const MainContainer = () => {
     // eslint-disable-next-line
   }, []);
 
+  console.log("MainContainer component is being rendered.");
   return (
     <Container>
       <h1>Users</h1>
-
       <UsersListContainer>
         {users.map((user) => (
           <UserContainer key={`user-${user.id}`}>
@@ -25,6 +26,7 @@ export const MainContainer = () => {
           </UserContainer>
         ))}
       </UsersListContainer>
+      <UserList />
     </Container>
   );
 };

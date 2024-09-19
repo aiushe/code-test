@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import { onApproveContent, onRejectContent } from "../redux/actions/dashboardActions";
+import { onApproveContent, onRejectContent } from "../redux/actions/dashboard-actions";
 
 // Styled components for consistent UI
 const ContentContainer = styled.div`
@@ -43,7 +43,6 @@ const UserContent = ({ userId, content }) => {
   // Get loading state for content items from Redux store
   console.log("userId:", userId);
   console.log("content:", content);
-  console.log("loadingContentItems:", loadingContentItems);
 
   const loadingContentItems = useSelector((state) => state.dashboard.loadingContentItems);
 

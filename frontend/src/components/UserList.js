@@ -4,6 +4,8 @@ import { onLoadDashboardUsers, onLoadUserContent } from "../redux/actions/dashbo
 import styled from "styled-components";
 import UserContent from "./UserContent";
 
+console.log("UserList component is being imported.");
+
 // Styled components for consistent UI
 const UserContainer = styled.div`
   margin: 20px;
@@ -20,7 +22,7 @@ const UserItem = styled.div`
 
 // Styled button for viewing content
 const ViewContentButton = styled.button`
-  background-color: #007bff;
+  background-color: #FF0000; //TODO: change to #007bff
   color: white;
   border: none;
   padding: 5px 10px;
@@ -40,46 +42,25 @@ const ViewContentButton = styled.button`
 // UserList component
 const UserList = () => {
   const dispatch = useDispatch();
-  // Select relevant state from Redux store
-  console.log("User content in Redux:", userContent);
-  console.log("Loading content by user in Redux:", loadingContentByUser);
-  console.log("Users in Redux:", users);
-  console.log("Loading users in Redux:", loadingUsers);
-  console.log("Active user in Redux:", activeUser);
   
-  // Select relevant state from Redux store
   const users = useSelector((state) => state.dashboard.users);
   const userContent = useSelector((state) => state.dashboard.userContent);
-  const loadingUsers = useSelector((state) => state.dashboard.loadingUsers);
+  const loadingUsers = useSelector((state) => state.dashboard.isLoading);
   const loadingContentByUser = useSelector((state) => state.dashboard.loadingContentByUser);
 
-  // State to track which user's content is currently being viewed
   const [activeUser, setActiveUser] = useState(null);
 
-  // Debug log to check if user content is being fetched correctly
-  console.log("user content:", userContent);
-  console.log("loading content by user:", loadingContentByUser);
-  console.log("users:", users);
-  console.log("loading users:", loadingUsers);
-  console.log("active user:", activeUser);
-  
   useEffect(() => {
-    console.log("user content:", userContent);
-  }, [userContent]);
-  
-  // Handler for viewing a user's content
-  console.log("activeUser:", activeUser);
+    dispatch(onLoadDashboardUsers());
+  }, [dispatch]);
 
+  // Handler for viewing a user's content
   const handleViewContent = (userId) => {
-    console.log("Clicked View Content for user:", userId);
     if (activeUser === userId) {
-      setActiveUser(null); // Toggle off if the same user is clicked again
+      setActiveUser(null);
     } else {
-      setActiveUser(userId); // Set the active user
-      if (!userContent[userId]) {
-        console.log("Dispatching content load for user:", userId);
-        dispatch(onLoadUserContent(userId)); // Only load if not already loaded
-      }
+      setActiveUser(userId);
+      dispatch(onLoadUserContent(userId));
     }
   };  
 
@@ -112,12 +93,11 @@ const UserList = () => {
               {activeUser === user.id ? "Hide Content" : "View Content"}
             </ViewContentButton>
           </UserItem>
-          {/* Conditional rendering of user content */}
           {activeUser === user.id && (
             <>
               {loadingContentByUser[user.id] ? (
                 <div>Loading content...</div>
-              ) : userContent[user.id] && userContent[user.id].length > 0 ? (
+              ) : userContent[user.id] ? (
                 <UserContent
                   userId={user.id}
                   content={userContent[user.id]}

@@ -10,3 +10,10 @@ export const UsersListContainer = styled.div`
 `;
 
 export const UserContainer = styled.div``;
+
+//add a test styled component for the user content like a message
+export const UserContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
