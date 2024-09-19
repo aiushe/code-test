@@ -30,6 +30,7 @@ export default class Content extends Model {
   })
   declare status: ContentStatus;
 
+  // Foreign key to User model
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
