@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { onLoadDashboardUsers, onLoadUserContent, onApproveContent, onRejectContent } from "../redux/actions/dashboard-actions";
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from "styled-components";
+import { onLoadDashboardUsers, onLoadUserContent, onApproveContent, onRejectContent } from '../redux/actions/dashboard-actions';
 
-console.log("UserListAndContent component is being imported.");
+console.log("UserList component is being imported.");
 
 // Styled components
 const PageBackground = styled.div`
-  background-color: #FFFFFF;
+  background: #FFFFFF;
   min-height: 100vh;
   padding: 20px;
 `;
@@ -16,19 +16,25 @@ const UserContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 30px 24px;
-  background-color: #FFFFFF;
+  padding: 0 24px 30px;
+  background: #FFFFFF;
   text-transform: uppercase;
-  border-radius: 8px;
+  border-radius: 12px;
 `;
 
 const UserItem = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #E0E0E0;
+  background: #f0f0f0; /* Changed from gradient */
   border-radius: 20px;
   overflow: hidden;
   text-transform: uppercase;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease; /* Animation for interactivity */
+
+  &:hover {
+    transform: scale(1.02); /* Slight scale on hover for engagement */
+  }
 `;
 
 const UserHeader = styled.div`
@@ -36,27 +42,39 @@ const UserHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  background-color: #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
+  background-color: #f0f0f0; /* Changed */
+  border-bottom: 1px solid #f0f0f0; /* Changed */
+`;
+
+const UserName = styled.div`
+  font-size: 18px;
+  font-weight: bold;
+  color: #007aff;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const ViewContentButton = styled.button`
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #007aff;
   color: white;
-  border: none;
+  border: 2px solid #007aff;
   border-radius: 25px;
   cursor: pointer;
   font-weight: bold;
   text-transform: uppercase;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: white;
+    color: #007aff;
+    border-color: #007aff;
   }
 
   &:disabled {
-    background-color: #6c757d;
+    background-color: #f0f0f0; /* Changed */
+    border-color: #f0f0f0; /* Changed */
+    color: #242F57; /* Changed to maintain contrast */
     cursor: not-allowed;
   }
 `;
@@ -67,28 +85,33 @@ const UserContentWrapper = styled.div`
 
 const ContentContainer = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 25px;
   padding: 30px 24px;
-  background-color: #e0e0e0;
+  background: #f0f0f0; /* Already #f0f0f0, no change needed */
 `;
 
 const ContentItem = styled.div`
   display: flex;
   flex-direction: column;
   width: calc(33.33% - 14px);
-  background-color: #ffffff;
+  background: #FFFFFF;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+  }
 `;
 
 const ContentImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 8px;
 `;
 
 const ContentInfo = styled.div`
@@ -103,21 +126,20 @@ const ImageContainer = styled.div`
   margin-bottom: 10px;
   overflow: hidden;
   position: relative;
-  border-radius: 10px;
+  border-radius: 8px;
 `;
 
 const ImageUnderline = styled.div`
   width: 100%;
   height: 1px;
-  background-color: #E0E0E0;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  background: #f0f0f0; /* Changed */
+  margin: 10px 0;
 `;
 
 const ActionButton = styled.button`
   padding: 10px 20px;
-  background-color: ${(props) => (props.approve ? "#1C33EE" : "#E9EDF7")};
-  color: ${(props) => (props.approve ? "white" : "#1C33EE")};
+  background: ${(props) => (props.approve ? "#007aff" : "#E9EDF7")};
+  color: ${(props) => (props.approve ? "white" : "#007aff")};
   border: none;
   border-radius: 25px;
   cursor: pointer;
@@ -126,11 +148,12 @@ const ActionButton = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: ${(props) => (props.approve ? "#1626B3" : "#D1D9ED")};
+    background: ${(props) => (props.approve ? "#1626B3" : "#D1D9ED")};
   }
 
   &:disabled {
-    background-color: #6c757d;
+    background: #f0f0f0; /* Changed */
+    color: #242F57; /* Changed to maintain contrast */
     cursor: not-allowed;
   }
 `;
@@ -141,12 +164,16 @@ const StatusBadge = styled.span`
   font-size: 12px;
   font-weight: bold;
   text-transform: uppercase;
-  background-color: ${props => {
+  background: ${(props) => {
     switch (props.status) {
-      case 'pending': return '#FFF186';
-      case 'rejected': return '#FF8686';
-      case 'approved': return '#D6F559';
-      default: return '#6c757d';
+      case 'pending':
+        return '#FFF186';
+      case 'rejected':
+        return '#FF8686';
+      case 'approved':
+        return '#D6F559';
+      default:
+        return '#f0f0f0'; /* Changed */
     }
   }};
   color: #242F57;
@@ -156,103 +183,69 @@ const StatusBadge = styled.span`
   z-index: 1;
 `;
 
-const UserName = styled.span`
-  font-size: 14px;
-  font-weight: bold;
-  color: #ffffff;
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  z-index: 1;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  text-transform: uppercase;
-`;
-
 const getUserDisplayName = (userId) => {
   if (typeof userId === 'string' && userId.length > 0) {
     return `USER ${userId.toUpperCase()}`;
   } else if (typeof userId === 'number') {
-    return `USER ${String.fromCharCode(65 + (userId % 26))}`;
+    return `USER ${String.fromCharCode(65 + ((userId - 1) % 26))}`;
   } else {
     return 'USER';
   }
 };
 
-const UserContent = ({ userId, userName, content }) => {
-  const dispatch = useDispatch();
-  const loadingContentItems = useSelector((state) => state.dashboard.loadingContentItems) || {};
+const PageTitle = styled.h1`
+  background: linear-gradient(135deg, #007aff, #00c6ff);
+  color: #fff;
+  padding: 50px;
+  border-radius: 15px;
+  text-align: center;
+  margin: 0 20px 20px;
+  font-size: 36px;
+  text-transform: uppercase;
+  width: calc(100% - 40px);
+  box-sizing: border-box;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
 
-  const handleApprove = (contentId) => {
-    dispatch(onApproveContent(userId, contentId));
-  };
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
 
-  const handleReject = (contentId) => {
-    dispatch(onRejectContent(userId, contentId));
-  };
+  &::after {
+    content: 'USER LIST  USER LIST  USER LIST  USER LIST  USER LIST  USER LIST  USER LIST  USER LIST  USER LIST  USER LIST';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: moveText 20s linear infinite;
+  }
 
-  return (
-    <ContentContainer>
-      {content.slice(0, 3).map((item) => (
-        <ContentItem key={item.id}>
-          <ImageContainer>
-            <StatusBadge status={item.status}>{item.status.toUpperCase()}</StatusBadge>
-            {Array.isArray(item.urls) && item.urls.length > 0 ? (
-              <ContentImage src={item.urls[0]} alt={`Content ${item.id}`} />
-            ) : item.url ? (
-              <ContentImage src={item.url} alt={`Content ${item.id}`} />
-            ) : null}
-            <UserName>{userName}</UserName>
-          </ImageContainer>
-          <ImageUnderline />
-          <ContentInfo>
-            {item.status === 'pending' && (
-              <>
-                <ActionButton
-                  approve
-                  onClick={() => handleApprove(item.id)}
-                  disabled={loadingContentItems[item.id]}
-                >
-                  {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
-                </ActionButton>
-                <ActionButton
-                  onClick={() => handleReject(item.id)}
-                  disabled={loadingContentItems[item.id]}
-                >
-                  {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
-                </ActionButton>
-              </>
-            )}
-            {item.status === 'approved' && (
-              <ActionButton
-                onClick={() => handleReject(item.id)}
-                disabled={loadingContentItems[item.id]}
-              >
-                {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
-              </ActionButton>
-            )}
-            {item.status === 'rejected' && (
-              <ActionButton
-                approve
-                onClick={() => handleApprove(item.id)}
-                disabled={loadingContentItems[item.id]}
-              >
-                {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
-              </ActionButton>
-            )}
-          </ContentInfo>
-        </ContentItem>
-      ))}
-    </ContentContainer>
-  );
-};
+  @keyframes moveText {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+`;
 
 const UserListAndContent = () => {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.dashboard.users);
-  const userContent = useSelector((state) => state.dashboard.userContent);
   const loadingUsers = useSelector((state) => state.dashboard.isLoading);
-  const loadingContentByUser = useSelector((state) => state.dashboard.loadingContentByUser);
   const [activeUser, setActiveUser] = useState(null);
+  const [localContent, setLocalContent] = useState({});
+  const userContent = useSelector((state) => state.dashboard?.userContent?.[activeUser] || []);
+  const loadingContentByUser = useSelector((state) => state.dashboard?.loadingContentByUser?.[activeUser] || false);
+  const loadingContentItems = useSelector((state) => state.dashboard.loadingContentItems) || {};
 
   useEffect(() => {
     dispatch(onLoadDashboardUsers());
@@ -265,19 +258,90 @@ const UserListAndContent = () => {
       setActiveUser(userId);
       dispatch(onLoadUserContent(userId));
     }
-  };  
+  };
+
+  const handleApprove = (contentId) => {
+    dispatch(onApproveContent(activeUser, contentId));
+    setLocalContent(prevContent => ({
+      ...prevContent,
+      [activeUser]: prevContent[activeUser].map(item =>
+        item.id === contentId ? { ...item, status: 'approved' } : item
+      )
+    }));
+  };
+
+  const handleReject = (contentId) => {
+    dispatch(onRejectContent(activeUser, contentId));
+    setLocalContent(prevContent => ({
+      ...prevContent,
+      [activeUser]: prevContent[activeUser].map(item =>
+        item.id === contentId ? { ...item, status: 'rejected' } : item
+      )
+    }));
+  };
+
+  useEffect(() => {
+    if (activeUser && userContent) {
+      setLocalContent(prevContent => ({
+        ...prevContent,
+        [activeUser]: userContent
+      }));
+    }
+  }, [activeUser, userContent]);
+
+  const renderActionButton = (item) => {
+    if (item.status === 'pending') {
+      return (
+        <>
+          <ActionButton
+            approve
+            onClick={() => handleApprove(item.id)}
+            disabled={loadingContentItems[item.id]}
+          >
+            {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
+          </ActionButton>
+          <ActionButton
+            onClick={() => handleReject(item.id)}
+            disabled={loadingContentItems[item.id]}
+          >
+            {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
+          </ActionButton>
+        </>
+      );
+    } else if (item.status === 'approved') {
+      return (
+        <ActionButton
+          onClick={() => handleReject(item.id)}
+          disabled={loadingContentItems[item.id]}
+        >
+          {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
+        </ActionButton>
+      );
+    } else if (item.status === 'rejected') {
+      return (
+        <ActionButton
+          approve
+          onClick={() => handleApprove(item.id)}
+          disabled={loadingContentItems[item.id]}
+        >
+          {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
+        </ActionButton>
+      );
+    }
+  };
 
   if (loadingUsers) {
     return <PageBackground><div>LOADING USERS...</div></PageBackground>;
   }
-  
+
   return (
     <PageBackground>
+      <PageTitle> </PageTitle>
       <UserContainer>
         {users.map((user) => (
           <UserItem key={user.id}>
             <UserHeader>
-              <div>{getUserDisplayName(user.id)}</div>
+              <UserName>{getUserDisplayName(user.id)}</UserName>
               <ViewContentButton
                 onClick={() => handleViewContent(user.id)}
                 disabled={loadingContentByUser && loadingContentByUser[user.id]}
@@ -287,14 +351,28 @@ const UserListAndContent = () => {
             </UserHeader>
             {activeUser === user.id && (
               <UserContentWrapper>
-                {loadingContentByUser[user.id] ? (
+                {loadingContentByUser ? (
                   <div>LOADING CONTENT...</div>
-                ) : userContent[user.id] ? (
-                  <UserContent
-                    userId={user.id}
-                    userName={getUserDisplayName(user.id)}
-                    content={userContent[user.id]}
-                  />
+                ) : localContent[activeUser]?.length > 0 ? (
+                  <ContentContainer>
+                    {localContent[activeUser].slice(0, 3).map((item) => (
+                      <ContentItem key={item.id}>
+                        <ImageContainer>
+                          <StatusBadge status={item.status}>{item.status.toUpperCase()}</StatusBadge>
+                          {Array.isArray(item.urls) && item.urls.length > 0 ? (
+                            <ContentImage src={item.urls[0]} alt={`Content ${item.id}`} />
+                          ) : item.url ? (
+                            <ContentImage src={item.url} alt={`Content ${item.id}`} />
+                          ) : null}
+                          <UserName>{getUserDisplayName(user.id)}</UserName>
+                        </ImageContainer>
+                        <ImageUnderline />
+                        <ContentInfo>
+                          {renderActionButton(item)}
+                        </ContentInfo>
+                      </ContentItem>
+                    ))}
+                  </ContentContainer>
                 ) : (
                   <div>NO CONTENT AVAILABLE FOR THIS USER.</div>
                 )}
