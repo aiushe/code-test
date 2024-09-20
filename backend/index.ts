@@ -100,44 +100,27 @@ app.patch(
     const { contentId } = req.params;
     const { status } = req.body;
 
-    // Log the request details for debugging
-    console.log(`content ID: ${contentId}, status: ${status}`);
-    console.log(`Request body: ${JSON.stringify(req.body)}`);
-    console.log(`Valid statuses: ${Object.values(ContentStatus).join(", ")}`);  
+    console.log(`Attempting to update content ${contentId} to status ${status}`);
 
     // Check if the provided status is valid
-    // Prevents setting the status to something unexpected
-    // Object.values(ContentStatus) returns an array of all the values of the ContentStatus enum
-    // includes() checks if the status is in the array
-    // if not, return 400 status and message
     if (!Object.values(ContentStatus).includes(status as ContentStatus)) {
       console.log(`Invalid status: ${status}`);
       return res.status(400).json({ message: "status is not valid" });
     }
 
     // Fetch content by ID
-    // findByPk() is a method that finds a single record by its primary key
-    // contentId is the primary key
     const content = await Content.findByPk(contentId);
     if (!content) {
       return res.status(404).json({ message: "content does not exist" });
     }
 
-    // If the content is already approved, you can't change the status
-    // 400 is the error code for bad request
-    if (content.status === ContentStatus.APPROVED) {
-      return res.status(400).json({
-        message: "content is already approved, you can't change the status",
-      });
-    }
+    console.log("Current content status:", content.status);
+    console.log("Requested status:", status);
 
-    console.log("content.status:", content.status);
-    console.log("status:", status);
-
-    // Update content status by casting the string to the ContentStatus enum
-    console.log("content.status before update:", content.status);
+    // Update content status
     await content.update({ status: status as ContentStatus });
-    console.log("content.status after update:", content.status);
+    
+    console.log("Updated content status:", content.status);
     res.json({ message: "status updated" });
   }
 );

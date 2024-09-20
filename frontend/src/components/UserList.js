@@ -271,6 +271,7 @@ const UserListAndContent = () => {
   };
 
   const handleReject = (contentId) => {
+    console.log(`Reject button clicked for content ID: ${contentId}`);
     dispatch(onRejectContent(activeUser, contentId));
     setLocalContent(prevContent => ({
       ...prevContent,
@@ -284,15 +285,46 @@ const UserListAndContent = () => {
     if (activeUser && userContent) {
       setLocalContent(prevContent => ({
         ...prevContent,
-        [activeUser]: userContent
+        [activeUser]: userContent.map(item => ({
+          ...item,
+          status: item.status || 'pending'
+        }))
       }));
     }
   }, [activeUser, userContent]);
 
   const renderActionButton = (item) => {
-    if (item.status === 'pending') {
-      return (
-        <>
+    switch(item.status) {
+      case 'pending':
+        return (
+          <>
+            <ActionButton
+              approve
+              onClick={() => handleApprove(item.id)}
+              disabled={loadingContentItems[item.id]}
+            >
+              {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
+            </ActionButton>
+            <ActionButton
+              reject
+              onClick={() => handleReject(item.id)}
+              disabled={loadingContentItems[item.id]}
+            >
+              {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
+            </ActionButton>
+          </>
+        );
+      case 'approved':
+        return (
+          <ActionButton
+            onClick={() => handleReject(item.id)}
+            disabled={loadingContentItems[item.id]}
+          >
+            {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
+          </ActionButton>
+        );
+      case 'rejected':
+        return (
           <ActionButton
             approve
             onClick={() => handleApprove(item.id)}
@@ -300,33 +332,9 @@ const UserListAndContent = () => {
           >
             {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
           </ActionButton>
-          <ActionButton
-            onClick={() => handleReject(item.id)}
-            disabled={loadingContentItems[item.id]}
-          >
-            {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
-          </ActionButton>
-        </>
-      );
-    } else if (item.status === 'approved') {
-      return (
-        <ActionButton
-          onClick={() => handleReject(item.id)}
-          disabled={loadingContentItems[item.id]}
-        >
-          {loadingContentItems[item.id] ? 'REJECTING...' : 'REJECT'}
-        </ActionButton>
-      );
-    } else if (item.status === 'rejected') {
-      return (
-        <ActionButton
-          approve
-          onClick={() => handleApprove(item.id)}
-          disabled={loadingContentItems[item.id]}
-        >
-          {loadingContentItems[item.id] ? 'APPROVING...' : 'APPROVE'}
-        </ActionButton>
-      );
+        );
+      default:
+        return null;
     }
   };
 

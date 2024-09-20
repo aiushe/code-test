@@ -9,4 +9,7 @@ export const approveContent = (userId, contentId) => {
   return api.patch(`/content/${contentId}/status`, { status: 'approved' });
 };
 // Reject the content for a specific user
-export const rejectContent = (contentId) => api.patch(`/content/${contentId}/status`, { status: 'rejected' });
+export const rejectContent = (userId, contentId) => {
+  console.log(`Rejecting content - userId: ${userId}, contentId: ${contentId}`);
+  return api.patch(`/content/${contentId}/status`, { status: 'rejected' });
+};

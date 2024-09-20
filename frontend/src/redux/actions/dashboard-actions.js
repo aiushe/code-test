@@ -53,18 +53,21 @@ export const onLoadUserContent = (userId) => async (dispatch) => {
 // Finally, it dispatches the action to set the loading state for the content item to false.
 export const onApproveContent = (userId, contentId) => async (dispatch) => {
   console.log(`Action triggered to approve content for user: ${userId}, contentId: ${contentId}`);
-  dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: true } });
+  dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, isLoading: true } });
   try {
     const response = await approveContent(userId, contentId);
     console.log('Approval response:', response);
-    dispatch({ type: DashboardActions.APPROVE_CONTENT, payload: { userId, contentId } });
+    dispatch({ 
+      type: DashboardActions.UPDATE_CONTENT_STATUS_SUCCESS, 
+      payload: { userId, contentId, status: 'approved' } 
+    });
   } catch (error) {
     console.error(`Error approving content for user ${userId}:`, error);
     if (error.response) {
       console.error('Error response:', error.response.data);
     }
   } finally {
-    dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: false } });
+    dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, isLoading: false } });
   }
 };
 
@@ -77,14 +80,17 @@ export const onApproveContent = (userId, contentId) => async (dispatch) => {
 // Finally, it dispatches the action to set the loading state for the content item to false.
 export const onRejectContent = (userId, contentId) => async (dispatch) => {
   console.log(`Action triggered to reject content for user: ${userId}, contentId: ${contentId}`);
-  dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: true } });
+  dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, isLoading: true } });
   try {
-    await rejectContent(userId, contentId);  // Call the API
-    dispatch({ type: DashboardActions.REJECT_CONTENT, payload: { userId, contentId } });
+    await rejectContent(userId, contentId);
+    dispatch({ 
+      type: DashboardActions.UPDATE_CONTENT_STATUS_SUCCESS, 
+      payload: { userId, contentId, status: 'rejected' } 
+    });
   } catch (error) {
     console.error(`Error rejecting content for user ${userId}:`, error);
   } finally {
-    dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: false } });
+    dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, isLoading: false } });
   }
 };
 
