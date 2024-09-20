@@ -1,4 +1,10 @@
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
+
+export const GlobalStyle = createGlobalStyle`
+  body {
+    font-family: 'Roboto', sans-serif;
+  }
+`;
 
 export const Container = styled.div`
   padding: 1rem;
@@ -11,7 +17,6 @@ export const UsersListContainer = styled.div`
 
 export const UserContainer = styled.div``;
 
-//add a test styled component for the user content like a message
 export const UserContentContainer = styled.div`
   display: flex;
   flex-direction: column;

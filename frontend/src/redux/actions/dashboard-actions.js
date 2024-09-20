@@ -55,10 +55,14 @@ export const onApproveContent = (userId, contentId) => async (dispatch) => {
   console.log(`Action triggered to approve content for user: ${userId}, contentId: ${contentId}`);
   dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: true } });
   try {
-    await approveContent(userId, contentId);  // Call the API
+    const response = await approveContent(userId, contentId);
+    console.log('Approval response:', response);
     dispatch({ type: DashboardActions.APPROVE_CONTENT, payload: { userId, contentId } });
   } catch (error) {
     console.error(`Error approving content for user ${userId}:`, error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+    }
   } finally {
     dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: false } });
   }
@@ -81,5 +85,29 @@ export const onRejectContent = (userId, contentId) => async (dispatch) => {
     console.error(`Error rejecting content for user ${userId}:`, error);
   } finally {
     dispatch({ type: DashboardActions.SET_LOADING_CONTENT_ITEM, payload: { contentId, loading: false } });
+  }
+};
+
+export const updateContentStatus = (contentId, status) => async (dispatch) => {
+  console.log(`Attempting to update content ${contentId} to status ${status}`);
+  dispatch({ type: DashboardActions.UPDATE_CONTENT_STATUS_START, payload: contentId });
+  try {
+    const response = await fetch(`http://localhost:4000/content/${contentId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to update content status: ${errorData.message}`);
+    }
+    const data = await response.json();
+    console.log('Update successful:', data);
+    dispatch({ type: DashboardActions.UPDATE_CONTENT_STATUS_SUCCESS, payload: { contentId, status } });
+  } catch (error) {
+    console.error('Error updating content status:', error);
+    dispatch({ type: DashboardActions.UPDATE_CONTENT_STATUS_FAILURE, payload: contentId });
   }
 };

@@ -102,6 +102,8 @@ app.patch(
 
     // Log the request details for debugging
     console.log(`content ID: ${contentId}, status: ${status}`);
+    console.log(`Request body: ${JSON.stringify(req.body)}`);
+    console.log(`Valid statuses: ${Object.values(ContentStatus).join(", ")}`);  
 
     // Check if the provided status is valid
     // Prevents setting the status to something unexpected
@@ -109,6 +111,7 @@ app.patch(
     // includes() checks if the status is in the array
     // if not, return 400 status and message
     if (!Object.values(ContentStatus).includes(status as ContentStatus)) {
+      console.log(`Invalid status: ${status}`);
       return res.status(400).json({ message: "status is not valid" });
     }
 
